@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", postgres.GetAllHero)
+	http.HandleFunc("/api/heros", postgres.GetAllHero)
+	http.HandleFunc("/admin/newhero", postgres.CreateHero)
 	http.ListenAndServe(":8000", nil)
 }
