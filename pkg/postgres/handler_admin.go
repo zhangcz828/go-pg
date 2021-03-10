@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	_ "github.com/lib/pq"
 	"go-pg/modules"
+	"go-pg/pkg/connection"
 	"log"
 	"net/http"
 )
@@ -41,7 +42,7 @@ func CreateHero(w http.ResponseWriter, r *http.Request) {
 func insertHero(hero modules.Hero) string {
 
 	// create the postgres db connection
-	db := createConnection()
+	db := connection.CreateConnection()
 
 	// close the db connection
 	defer db.Close()

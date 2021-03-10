@@ -1,42 +1,41 @@
-package postgres
+package cache
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/golang/groupcache"
-	_ "github.com/lib/pq"
-	"go-pg/cache"
 	"go-pg/modules"
 	"go-pg/pkg/connection"
 	"log"
-	"net/http"
 )
 
-func GetAllHeros(w http.ResponseWriter, r *http.Request) {
-	var data []byte
-	var heros []modules.Hero
+var HerosGroup *groupcache.Group
 
-	// 缓存数据库的key
-	k := r.URL.Path + r.Method
-
-	log.Printf("user get %s of value from groupcache\n", k)
-	cache.CreateHerosCacheGroup().Get(nil, k, groupcache.AllocatingByteSliceSink(&data))
-
-	json.Unmarshal(data, &heros)
-	json.NewEncoder(w).Encode(heros)
+func SetCacheHttpPool(addr string, peers_addr []string) {
+	peers := groupcache.NewHTTPPool(addr)
+	peers.Set(peers_addr...)
 }
 
-// GetAllHero will return all the Hero
-func GetAllHero(w http.ResponseWriter, r *http.Request) {
-	//w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
-	//w.Header().Set("Access-Control-Allow-Origin", "*")
-	// get all the users in the db
-	allHero, err := getAllHero()
-	if err != nil {
-		log.Fatalf("Unable to get all heros. %v", err)
-	}
+// 单例模式， groupcache.Group 必须唯一
+func CreateHerosCacheGroup() *groupcache.Group {
+	if HerosGroup == nil {
+		HerosGroup = groupcache.NewGroup("getHeros", 8<<30,
+			groupcache.GetterFunc(
+				func(ctx context.Context, key string, dest groupcache.Sink) error {
+					heros, err := getAllHero()
+					if err != nil {
+						log.Fatalf("Unable to get all heros. %v", err)
+					}
 
-	// send all the hero as response
-	json.NewEncoder(w).Encode(allHero)
+					log.Printf("Get %s of value from database.\n",key)
+					herosB, _ := json.Marshal(heros)
+					// dest.SetBytes([]byte(fmt.Sprintf("%v", heros)))
+					dest.SetBytes(herosB)
+					return nil
+				}))
+	}
+	// 获取group对象
+	return HerosGroup
 }
 
 func getAllHero() ([]modules.Hero, error){
