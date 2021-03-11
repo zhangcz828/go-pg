@@ -23,7 +23,7 @@ INSERT INTO Boss VALUES ('东方不败','武功：葵花宝典', 20, 5, 100, 1);
 INSERT INTO Boss VALUES ('玄冥二老','武功：玄冥神掌', 15, 10, 100, 2);
 
 CREATE TABLE Session(
-    ID int,
+    UID int,
     HeroName varchar(20),
     HeroBlood int,
     BossBlood int,

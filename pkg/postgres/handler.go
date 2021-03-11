@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"encoding/json"
-	"github.com/golang/groupcache"
 	_ "github.com/lib/pq"
 	"go-pg/cache"
 	"go-pg/modules"
@@ -12,16 +11,35 @@ import (
 )
 
 func GetAllHeros(w http.ResponseWriter, r *http.Request) {
-	var data []byte
 	var heros []modules.Hero
 
 	// 缓存数据库的key
-	k := r.URL.Path + r.Method
+	k := cache.HeroList
 
-	log.Printf("user get %s of value from groupcache\n", k)
-	cache.CreateHerosCacheGroup().Get(nil, k, groupcache.AllocatingByteSliceSink(&data))
+	c := cache.GetCache()
 
-	json.Unmarshal(data, &heros)
+	if value, ok := c.Get(k); ok {
+		// v, ok := value.(modules.Hero)
+		//if !ok {
+		//	log.Fatal("It's not ok for type Hero")
+		//}
+
+		log.Printf("user get %s of value from Cache\n", k)
+
+		json.NewEncoder(w).Encode(value)
+
+		return
+	}
+
+	heros, err := getAllHero()
+	if err != nil {
+		log.Fatalf("Unable to get data from database. %v", err)
+
+	}
+
+	// 写缓存
+	c.Add(k, heros)
+
 	json.NewEncoder(w).Encode(heros)
 }
 

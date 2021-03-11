@@ -3,6 +3,7 @@ package postgres
 import (
 	"encoding/json"
 	_ "github.com/lib/pq"
+	"go-pg/cache"
 	"go-pg/modules"
 	"go-pg/pkg/connection"
 	"log"
@@ -28,6 +29,10 @@ func CreateHero(w http.ResponseWriter, r *http.Request) {
 
 	// call insert user function and pass the user
 	insertName := insertHero(hero)
+
+	// Delete the cache for listing all heros
+	c := cache.GetCache()
+	c.Remove(cache.HeroList)
 
 	// format a response object
 	res := response{
