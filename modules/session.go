@@ -1,11 +1,13 @@
 package modules
 
+import "time"
+
 type Session struct {
-	ID int
+	UID int
 	HeroName string
 	HeroBlood int
 	BossBlood int
 	CurrentLevel int
 	Score int
-	ArchiveDate string
+	ArchiveDate time.Time
 }

@@ -15,16 +15,13 @@ var cache *lru.Cache
 // the length of cache map
 var cacheSize int = 2
 
-var mu sync.Mutex
+var once sync.Once
 
 // 单例模式
 func GetCache() *lru.Cache {
-	mu.Lock()
-	defer mu.Unlock()
-
-	if cache == nil {
+	once.Do(func() {
 		cache, _ = lru.New(cacheSize)
-	}
+	})
 
 	return cache
 }

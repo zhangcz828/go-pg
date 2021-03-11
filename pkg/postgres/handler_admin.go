@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"go-pg/cache"
 	"go-pg/modules"
@@ -16,12 +17,12 @@ type response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func CreateHero(w http.ResponseWriter, r *http.Request) {
+func CreateHero(c *gin.Context) {
 	// create an empty hero of type models.Hero
 	var hero modules.Hero
 
 	// decode the json request to hero
-	err := json.NewDecoder(r.Body).Decode(&hero)
+	err := json.NewDecoder(c.Request.Body).Decode(&hero)
 
 	if err != nil {
 		log.Fatalf("Unable to decode the request body.  %v", err)
@@ -31,8 +32,8 @@ func CreateHero(w http.ResponseWriter, r *http.Request) {
 	insertName := insertHero(hero)
 
 	// Delete the cache for listing all heros
-	c := cache.GetCache()
-	c.Remove(cache.HeroList)
+	ch := cache.GetCache()
+	ch.Remove(cache.HeroList)
 
 	// format a response object
 	res := response{
@@ -41,7 +42,7 @@ func CreateHero(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send the response
-	json.NewEncoder(w).Encode(res)
+	c.JSON(http.StatusOK, res)
 }
 
 func insertHero(hero modules.Hero) string {

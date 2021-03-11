@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"go-pg/cache"
 	"go-pg/modules"
@@ -9,24 +9,17 @@ import (
 	"log"
 	"net/http"
 )
-
-func GetAllHeros(w http.ResponseWriter, r *http.Request) {
+func GinGetAllHeros(c *gin.Context) {
 	var heros []modules.Hero
 
 	// 缓存数据库的key
 	k := cache.HeroList
 
-	c := cache.GetCache()
+	ch := cache.GetCache()
 
-	if value, ok := c.Get(k); ok {
-		// v, ok := value.(modules.Hero)
-		//if !ok {
-		//	log.Fatal("It's not ok for type Hero")
-		//}
-
+	if value, ok := ch.Get(k); ok {
+		c.JSON(http.StatusOK, value)
 		log.Printf("user get %s of value from Cache\n", k)
-
-		json.NewEncoder(w).Encode(value)
 
 		return
 	}
@@ -38,24 +31,43 @@ func GetAllHeros(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 写缓存
-	c.Add(k, heros)
+	ch.Add(k, heros)
 
-	json.NewEncoder(w).Encode(heros)
+	c.JSON(http.StatusOK, heros)
 }
 
-// GetAllHero will return all the Hero
-func GetAllHero(w http.ResponseWriter, r *http.Request) {
-	//w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
-	//w.Header().Set("Access-Control-Allow-Origin", "*")
-	// get all the users in the db
-	allHero, err := getAllHero()
-	if err != nil {
-		log.Fatalf("Unable to get all heros. %v", err)
-	}
-
-	// send all the hero as response
-	json.NewEncoder(w).Encode(allHero)
-}
+//func GetAllHeros(w http.ResponseWriter, r *http.Request) {
+//	var heros []modules.Hero
+//
+//	// 缓存数据库的key
+//	k := cache.HeroList
+//
+//	c := cache.GetCache()
+//
+//	if value, ok := c.Get(k); ok {
+//		// v, ok := value.(modules.Hero)
+//		//if !ok {
+//		//	log.Fatal("It's not ok for type Hero")
+//		//}
+//
+//		log.Printf("user get %s of value from Cache\n", k)
+//
+//		json.NewEncoder(w).Encode(value)
+//
+//		return
+//	}
+//
+//	heros, err := getAllHero()
+//	if err != nil {
+//		log.Fatalf("Unable to get data from database. %v", err)
+//
+//	}
+//
+//	// 写缓存
+//	c.Add(k, heros)
+//
+//	json.NewEncoder(w).Encode(heros)
+//}
 
 func getAllHero() ([]modules.Hero, error){
 	db := connection.CreateConnection()

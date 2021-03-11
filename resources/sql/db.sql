@@ -23,7 +23,7 @@ INSERT INTO Boss VALUES ('东方不败','武功：葵花宝典', 20, 5, 100, 1);
 INSERT INTO Boss VALUES ('玄冥二老','武功：玄冥神掌', 15, 10, 100, 2);
 
 CREATE TABLE Session(
-    UID int,
+    UID int primary key,
     HeroName varchar(20),
     HeroBlood int,
     BossBlood int,
@@ -31,6 +31,9 @@ CREATE TABLE Session(
     Score int,
     ArchiveDate timestamp default now()
 );
+
+INSERT INTO Session VALUES ('4','张无忌', 100, 100, 1, 0, '2021-03-11T18:25:06.1577213+08:00');
+
 
 
 
