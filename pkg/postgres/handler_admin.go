@@ -78,3 +78,7 @@ func insertHero(hero modules.Hero) string {
 	// return the inserted id
 	return name
 }
+
+func AdjustHero(c *gin.Context) {
+
+}
