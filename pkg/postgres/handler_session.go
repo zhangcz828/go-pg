@@ -8,6 +8,7 @@ import (
 	"go-pg/pkg/connection"
 	"log"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -48,6 +49,33 @@ func (ss *sessions) RemoveSession(id string) {
 // ssMap 初始化，注意map初始化的坑
 var ssMap *sessions = &sessions{
 	sessionMap: make(map[string]modules.SessionView),
+}
+
+type ranking struct {
+	Key string `json:"userid"`
+	Value int `json:"score"`
+}
+
+// 实现排序的map, sort.Slice, link: https://duchengqian.com/go-sort.html
+func (r *ranking) Get() []ranking {
+	var rs []ranking
+	for k, v := range ssMap.sessionMap {
+		rs = append(rs, ranking{
+			Key: k,
+			Value: v.Score,
+	})
+	}
+
+	sort.Slice(rs, func(i, j int) bool {
+		return rs[i].Value> rs[j].Value
+	})
+
+	//for _, kv := range ss {
+	//	fmt.Printf("%s, %d\n", kv.Key, kv.Value)
+	//}
+
+	return rs
+
 }
 
 func GetSessionById(c *gin.Context) {
@@ -384,4 +412,25 @@ func NextLevel(c *gin.Context) {
 		"Message": "Go to the next Level!",
 	})
 
+}
+
+func Quit(c *gin.Context) {
+	sid := c.Params.ByName("id")
+
+	s := ssMap.GetSession(sid)
+
+	archive(s)
+
+	ssMap.RemoveSession(sid)
+
+	c.JSON(http.StatusOK, gin.H{
+		"Message": "Archived and quit successfully",
+	})
+}
+
+func OnlineRanking(c *gin.Context) {
+	var rk ranking
+	rks := rk.Get()
+
+	c.JSON(http.StatusOK, rks)
 }

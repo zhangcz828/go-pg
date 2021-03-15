@@ -16,7 +16,8 @@ func main() {
 	r.PUT("/session/:id/fight", postgres.Fight)  //打boss, 更新session里面的信息，得分
 	r.POST("/session/:id/archive", postgres.Archive) // ssMap[:id]存档到db
 	r.POST("/session/:id/level", postgres.NextLevel) // 过关，更新session[加血，currentLevel, boss信息]
-	//r.GET("/session/rank", postgres.Rank) //查看排名
+	r.POST("/session/:id/quit", postgres.Quit) // 玩家下线，自动存档
+	r.GET("/session/rank", postgres.OnlineRanking) //在线玩家积分排名
 
 	// Admin rest api
 	r.POST("/admin/hero", postgres.CreateHero) //添加新的hero
