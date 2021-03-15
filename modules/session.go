@@ -3,11 +3,17 @@ package modules
 import "time"
 
 type Session struct {
-	UID int
+	UID string
 	HeroName string
-	HeroBlood int
-	BossBlood int
+	LiveHeroBlood int
+	LiveBossBlood int
 	CurrentLevel int
 	Score int
 	ArchiveDate time.Time
+}
+
+type SessionView struct {
+	Session
+	Boss
+	Hero
 }
