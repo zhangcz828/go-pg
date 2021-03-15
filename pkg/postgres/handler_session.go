@@ -253,17 +253,25 @@ func archive(s modules.Session) {
 	db := connection.CreateConnection()
 	defer db.Close()
 
-	// create the sql query
-	sqlStatement := fmt.Sprintf("UPDATE session " +
-		"SET heroblood = %d, " +
-		"bossblood = %d, " +
-		"currentlevel = %d, " +
-		"score = %d, " +
-		"archivedate = %v " +
-		"WHERE uid = %s;", s.LiveHeroBlood, s.LiveBossBlood, s.CurrentLevel, s.Score, time.Now(), s.UID)
+	sqlStatement := `INSERT INTO session(uid, heroname, heroblood, bossblood, currentlevel, score, archivedate) VALUES($1, $2, $3, $4, $5, $6, $7) ON conflict (uid) DO UPDATE SET heroblood = $8, bossblood = $9, currentlevel = $10, score = $11, archivedate = $12;`
+
+	fmt.Println(sqlStatement)
 
 	// execute the sql statement
-	err := db.QueryRow(sqlStatement)
+	_, err := db.Exec(sqlStatement,
+		s.UID,
+		s.HeroName,
+		s.LiveHeroBlood,
+		s.LiveBossBlood,
+		s.CurrentLevel,
+		s.Score,
+		time.Now(),
+		s.LiveHeroBlood,
+		s.LiveBossBlood,
+		s.CurrentLevel,
+		s.Score,
+		time.Now())
+
 	if err != nil {
 		log.Fatalf("Unable to execute the query. %v", err)
 	}
