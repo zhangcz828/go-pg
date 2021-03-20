@@ -7,3 +7,6 @@ type Hero struct {
 	DefensePower int
 	Blood int
 }
+
+// Heros is a slice of Hero pointers.
+type Heros []*Hero
