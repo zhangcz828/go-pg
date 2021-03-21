@@ -48,9 +48,13 @@ Reference： https://mp.weixin.qq.com/s/37gV23UVHRA5SYeMEA5Q9w
 
 #### 3. 怎样让程序变的可测？
 Mock数据库的各种操作，把所有操作封装到interface， 这样就能在测试中定义一个mockDB
+
 测试的几个注意点：
+
 a) 不要测试你的依赖， mock之
+
 b) 善用interface
+
 c) 测试的套路， table driven
  
 ## 项目的组织形式
