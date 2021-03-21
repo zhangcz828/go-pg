@@ -2,34 +2,10 @@ package postgres
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-pg/modules"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-type DbStoreMock struct{}
-
-func (s DbStoreMock) GetAllHeros() modules.Heros {
-	heros := modules.Heros{
-		{
-			Name:"杨过",
-			Detail:"武功：黯然销魂掌, 蛤蟆功 xxxxxxxxxxxxx",
-			AttackPower:30,
-			DefensePower:15,
-			Blood:100,
-		},
-		{
-			Name: "xx",
-			Detail: "xx",
-			AttackPower: 2,
-			DefensePower: 4,
-			Blood: 100,
-		},
-	}
-
-	return heros
-}
 
 func TestGetHerosHandler(t *testing.T) {
 	// Create Mock Store
@@ -40,27 +16,27 @@ func TestGetHerosHandler(t *testing.T) {
 	router := gin.Default()
 	router.GET("/heros", GetHerosHandler(s))
 
-	tests := map[string]struct{
-		method string
-		path string
+	tests := map[string]struct {
+		method   string
+		path     string
 		wantCode int
 		wantBody string
-	} {
+	}{
 		"GetMethod": {
-			method: "GET",
-			path: "/heros",
+			method:   "GET",
+			path:     "/heros",
 			wantCode: http.StatusOK,
 			wantBody: `[{"name":"杨过","Detail":"武功：黯然销魂掌, 蛤蟆功 xxxxxxxxxxxxx","AttackPower":30,"DefensePower":15,"Blood":100},{"name":"xx","Detail":"xx","AttackPower":2,"DefensePower":4,"Blood":100}]`,
 		},
 		"InvalidPath": {
-			method: "GET",
-			path: "/herosssssss",
+			method:   "GET",
+			path:     "/herosssssss",
 			wantCode: http.StatusNotFound,
 			wantBody: "404 page not found",
 		},
 		"InvalidMethod": {
-			method: "PUT",
-			path: "/heros",
+			method:   "PUT",
+			path:     "/heros",
 			wantCode: http.StatusNotFound,
 			wantBody: "404 page not found",
 		},
@@ -87,18 +63,4 @@ func TestGetHerosHandler(t *testing.T) {
 			}
 		})
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

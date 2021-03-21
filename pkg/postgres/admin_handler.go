@@ -1,41 +1,49 @@
 package postgres
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	"go-pg/pkg/connection"
-	"log"
+	"go-pg/cache"
+	"go-pg/modules"
 	"net/http"
 )
 
 func CreateHeroHandler(h DbStoreInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		r := h.CreateHero(c)
-		c.JSON(r.Status, r.Message)
+		// create an empty hero of type models.Hero
+		var hero modules.Hero
+
+		// decode the json request to hero
+		err := json.NewDecoder(c.Request.Body).Decode(&hero)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Invalid request body")
+			return
+		}
+
+		// call insert user function and pass the user
+		res := h.CreateHero(hero)
+
+		if res.Status == http.StatusOK {
+			// Delete the cache for listing all heros
+			ch := cache.GetCache()
+			ch.Remove(cache.HeroList)
+		}
+
+		c.String(res.Status, res.Message)
+		return
 	}
 }
 
-func AdjustHero(c *gin.Context) {
-	// create the postgres db connection
-	db := connection.CreateConnection()
+func AdjustHeroHandler(h DbStoreInterface) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := h.AdjustHero()
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error in database %v", err)
+			return
+		}
 
-	// close the db connection
-	defer db.Close()
-
-	// create the insert sql query
-	// returning userid will return the id of the inserted user
-	sqlStatement := `UPDATE hero SET attackpower = attackpower*1.2, defensepower = defensepower*1.2`
-
-	// execute the sql statement
-	// Scan function will save the insert id in the id
-	_, err := db.Exec(sqlStatement)
-
-	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
+		c.String(http.StatusOK, "Heros update attack and defense power successfully.")
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"Message": "Heros update attack and defense power successfully.",
-	})
 }
 
